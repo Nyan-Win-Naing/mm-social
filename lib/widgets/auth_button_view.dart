@@ -7,9 +7,10 @@ class AuthButtonView extends StatelessWidget {
 
   final String label;
   final Function onTap;
+  final bool isButtonEnable;
 
 
-  AuthButtonView({required this.label, required this.onTap});
+  AuthButtonView({required this.label, required this.onTap, required this.isButtonEnable});
 
   @override
   Widget build(BuildContext context) {
@@ -21,13 +22,13 @@ class AuthButtonView extends StatelessWidget {
         padding:
         EdgeInsets.symmetric(horizontal: MARGIN_MEDIUM_3, vertical: 14),
         decoration: BoxDecoration(
-          color: ADD_NEW_POST_BUTTON_COLOR,
+          color: isButtonEnable ? ADD_NEW_POST_BUTTON_COLOR : Color.fromRGBO(43, 43, 43, 1.0),
           borderRadius: BorderRadius.circular(MARGIN_MEDIUM),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: Colors.white,
+            color: isButtonEnable ? Colors.white : Color.fromRGBO(85, 85, 85, 1.0),
             fontSize: TEXT_REGULAR_2X,
           ),
         ),

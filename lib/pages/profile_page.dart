@@ -1,64 +1,93 @@
 import 'package:flutter/material.dart';
+import 'package:mm_social/blocs/profile_bloc.dart';
+import 'package:mm_social/data/vos/user_vo.dart';
+import 'package:mm_social/pages/get_started_page.dart';
 import 'package:mm_social/resources/colors.dart';
 import 'package:mm_social/resources/dimens.dart';
+import 'package:provider/provider.dart';
 
 class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: SECONDARY_COLOR,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: PRIMARY_COLOR,
-        centerTitle: true,
-        elevation: 0,
-        title: Column(
-          children: [
-            Text(
-              "Alberto Calvo",
-            ),
-            SizedBox(height: MARGIN_SMALL),
-            Text(
-              "alberto203",
-              style: TextStyle(
-                color: CONTACT_PHONE_NUMBER_COLOR,
-                fontSize: TEXT_SMALL,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: MARGIN_MEDIUM),
-            child: Row(
+    return ChangeNotifierProvider(
+      create: (context) => ProfileBloc(),
+      child: Scaffold(
+        backgroundColor: SECONDARY_COLOR,
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          backgroundColor: PRIMARY_COLOR,
+          centerTitle: true,
+          elevation: 0,
+          title: Selector<ProfileBloc, UserVO?>(
+            selector: (context, bloc) => bloc.loggedInUser,
+            builder: (context, loggedInUser, child) => Column(
               children: [
-                Icon(
-                  Icons.qr_code_2,
+                Text(
+                  loggedInUser?.userName ?? "",
                 ),
-                SizedBox(width: MARGIN_SMALL),
-                Icon(
-                  Icons.arrow_forward_ios,
+                SizedBox(height: MARGIN_SMALL),
+                Text(
+                  loggedInUser?.getUserName() ?? "",
+                  style: TextStyle(
+                    color: CONTACT_PHONE_NUMBER_COLOR,
+                    fontSize: TEXT_SMALL,
+                  ),
                 ),
               ],
             ),
           ),
-        ],
-      ),
-      body: Container(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              ProfileImageSectionView(),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: MARGIN_MEDIUM_2),
-                child: BioSectionView(),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: MARGIN_MEDIUM),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.qr_code_2,
+                  ),
+                  SizedBox(width: MARGIN_SMALL),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                  ),
+                ],
               ),
-              SizedBox(height: MARGIN_MEDIUM_3),
-              ProfileInfoSectionView(),
-              SizedBox(height: MARGIN_LARGE),
-              LogoutButtonSectionView(),
-            ],
+            ),
+          ],
+        ),
+        body: Container(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Selector<ProfileBloc, UserVO?>(
+                  selector: (context, bloc) => bloc.loggedInUser,
+                  builder: (context, loggedInUser, child) => ProfileImageSectionView(profileImage: loggedInUser?.profilePicture ?? ""),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: MARGIN_MEDIUM_2),
+                  child: BioSectionView(),
+                ),
+                SizedBox(height: MARGIN_MEDIUM_3),
+                ProfileInfoSectionView(),
+                SizedBox(height: MARGIN_LARGE),
+                Builder(builder: (context) {
+                  return GestureDetector(
+                    onTap: () {
+                      ProfileBloc bloc =
+                          Provider.of<ProfileBloc>(context, listen: false);
+                      bloc.onTapLogout().then((value) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => GetStartedPage(),
+                          ),
+                        );
+                      });
+                    },
+                    child: LogoutButtonSectionView(),
+                  );
+                }),
+              ],
+            ),
           ),
         ),
       ),
@@ -74,7 +103,8 @@ class LogoutButtonSectionView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: MARGIN_XXLARGE, vertical: MARGIN_CARD_MEDIUM_2),
+      padding: EdgeInsets.symmetric(
+          horizontal: MARGIN_XXLARGE, vertical: MARGIN_CARD_MEDIUM_2),
       child: Text(
         "Log Out",
         style: TextStyle(
@@ -171,9 +201,11 @@ class BioSectionView extends StatelessWidget {
 }
 
 class ProfileImageSectionView extends StatelessWidget {
-  const ProfileImageSectionView({
-    Key? key,
-  }) : super(key: key);
+
+  final String profileImage;
+
+
+  ProfileImageSectionView({required this.profileImage});
 
   @override
   Widget build(BuildContext context) {
@@ -208,7 +240,7 @@ class ProfileImageSectionView extends StatelessWidget {
                 ),
                 image: DecorationImage(
                     image: NetworkImage(
-                      "https://assets.teenvogue.com/photos/59dd411e2c498e042993a583/4:3/w_2604,h_1953,c_limit/GettyImages-854239676.jpg",
+                        (profileImage.isNotEmpty) ? profileImage : "https://brsc.sa.edu.au/wp-content/uploads/2018/09/placeholder-profile-sq.jpg",
                     ),
                     fit: BoxFit.cover),
                 boxShadow: [

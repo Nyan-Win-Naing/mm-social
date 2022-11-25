@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mm_social/blocs/sign_up_bloc.dart';
+import 'package:mm_social/dummy/dummy_data.dart';
 import 'package:mm_social/pages/country_choose_page.dart';
 import 'package:mm_social/pages/privacy_policy_page.dart';
 import 'package:mm_social/resources/colors.dart';
@@ -47,16 +48,34 @@ class _SignUpPageState extends State<SignUpPage> {
                 SizedBox(height: MARGIN_XXLARGE),
                 AcceptTermAndPolicySectionView(),
                 SizedBox(height: MARGIN_LARGE),
-                AuthButtonView(
-                  label: "Accept and Continue",
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => PrivacyPolicyPage(),
-                      ),
-                    ).then((value) => print("Value is $value"));
-                  },
+                Consumer<SignUpBloc>(
+                  builder: (context, bloc, child) => AuthButtonView(
+                    label: "Accept and Continue",
+                    onTap: () {
+                      if(bloc.isButtonEnable) {
+                        // print("Username is ${bloc.name}");
+                        // print("Phone Number is ${dummyCountryMap[bloc.country]} ${bloc.phone}");
+                        // print("Password is ${bloc.password}");
+                        // print("Chosen Image File is ${bloc.chosenImageFile}");
+                        String username = bloc.name;
+                        String phoneNumber = "${dummyCountryMap[bloc.country]} ${bloc.phone}";
+                        String password = bloc.password;
+                        File? profileImage = bloc.chosenImageFile;
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PrivacyPolicyPage(
+                              username: username,
+                              phoneNumber: phoneNumber,
+                              password: password,
+                              profileImage: profileImage,
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                    isButtonEnable: bloc.isButtonEnable,
+                  ),
                 ),
                 SizedBox(height: MARGIN_XXLARGE * 2),
               ],
@@ -76,34 +95,49 @@ class AcceptTermAndPolicySectionView extends StatefulWidget {
 
 class _AcceptTermAndPolicySectionViewState
     extends State<AcceptTermAndPolicySectionView> {
-  bool isChecked = false;
+  // bool isChecked = false;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: MARGIN_XLARGE),
-          child: Row(
+    return Consumer<SignUpBloc>(
+      builder: (context, bloc, child) =>
+          Column(
             children: [
-              Theme(
-                data: ThemeData(
-                  unselectedWidgetColor: Colors.grey,
-                ),
-                child: Checkbox(
-                  value: isChecked,
-                  visualDensity: VisualDensity(horizontal: -4),
-                  shape: CircleBorder(),
-                  onChanged: (bool? value) {
-                    setState(() {
-                      isChecked = value!;
-                    });
-                  },
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: MARGIN_XLARGE),
+                child: Row(
+                  children: [
+                    Theme(
+                      data: ThemeData(
+                        unselectedWidgetColor: Colors.grey,
+                      ),
+                      child: Checkbox(
+                        value: bloc.isAccept,
+                        visualDensity: VisualDensity(horizontal: -4),
+                        shape: CircleBorder(),
+                        onChanged: (bool? value) {
+                          bloc.onAcceptPrivacyAndPolicy();
+                        },
+                      ),
+                    ),
+                    Flexible(
+                      child: Text(
+                        "I have read and accept the <<MM Social - Terms of Service>>",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: TEXT_SMALL,
+                          height: 1.3,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              Flexible(
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: MARGIN_LARGE),
                 child: Text(
-                  "I have read and accept the <<MM Social - Terms of Service>>",
+                  "The information collected on this page is only used for account registeration.",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.grey,
@@ -114,20 +148,6 @@ class _AcceptTermAndPolicySectionViewState
               ),
             ],
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: MARGIN_LARGE),
-          child: Text(
-            "The information collected on this page is only used for account registeration.",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.grey,
-              fontSize: TEXT_SMALL,
-              height: 1.3,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
@@ -139,49 +159,72 @@ class RegisterSectionView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ProfilePickerView(),
-        SizedBox(height: MARGIN_XLARGE * 2),
-        AuthFormView(
-          label: "Name",
-          hintText: "John Appleseed",
-        ),
-        SizedBox(height: MARGIN_MEDIUM),
-        CountryAndRegionChooseView(
-          onChooseCountry: () {
-
-          },
-        ),
-        SizedBox(height: MARGIN_MEDIUM_3),
-        AuthFormView(
-          label: "Phone",
-          hintText: "Enter mobile number",
-          isNumber: true,
-        ),
-        SizedBox(height: MARGIN_MEDIUM_3),
-        AuthFormView(
-          label: "Password",
-          hintText: "Enter password",
-          isPassword: true,
-        ),
-      ],
+    return Consumer<SignUpBloc>(
+      builder: (context, bloc, child) => Column(
+        children: [
+          ProfilePickerView(),
+          SizedBox(height: MARGIN_XLARGE * 2),
+          AuthFormView(
+            label: "Name",
+            hintText: "John Appleseed",
+            onChanged: (value) {
+              bloc.onUsernameChanged(value);
+            },
+          ),
+          SizedBox(height: MARGIN_MEDIUM),
+          CountryAndRegionChooseView(
+            countryName: bloc.country,
+            onChooseCountry: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CountryChoosePage(),
+                ),
+              ).then((value) {
+                if(value != null) {
+                  bloc.onCountryChanged(value);
+                }
+              });
+            },
+          ),
+          SizedBox(height: MARGIN_MEDIUM_3),
+          AuthFormView(
+            label: "Phone",
+            hintText: "Enter mobile number",
+            isNumber: true,
+            onChanged: (value) {
+              bloc.onPhoneChanged(value);
+            },
+          ),
+          SizedBox(height: MARGIN_MEDIUM_3),
+          AuthFormView(
+            label: "Password",
+            hintText: "Enter password",
+            isPassword: true,
+            onChanged: (value) {
+              bloc.onPasswordChanged(value);
+            },
+          ),
+        ],
+      ),
     );
   }
 }
 
 class CountryAndRegionChooseView extends StatefulWidget {
-
   final Function onChooseCountry;
+  final String countryName;
 
-
-  CountryAndRegionChooseView({required this.onChooseCountry});
+  CountryAndRegionChooseView(
+      {required this.onChooseCountry, required this.countryName});
 
   @override
-  State<CountryAndRegionChooseView> createState() => _CountryAndRegionChooseViewState();
+  State<CountryAndRegionChooseView> createState() =>
+      _CountryAndRegionChooseViewState();
 }
 
-class _CountryAndRegionChooseViewState extends State<CountryAndRegionChooseView> {
+class _CountryAndRegionChooseViewState
+    extends State<CountryAndRegionChooseView> {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -205,7 +248,7 @@ class _CountryAndRegionChooseViewState extends State<CountryAndRegionChooseView>
                   widget.onChooseCountry();
                 },
                 child: Text(
-                  "United States (+1)",
+                  "${widget.countryName} (${dummyCountryMap[widget.countryName]})",
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: TEXT_REGULAR_2X,

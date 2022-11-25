@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:mm_social/dummy/dummy_message_vo.dart';
 import 'package:mm_social/pages/email_form_page.dart';
@@ -7,15 +9,29 @@ import 'package:mm_social/resources/strings.dart';
 import 'package:mm_social/widgets/auth_button_view.dart';
 
 class PrivacyPolicyPage extends StatefulWidget {
+  final String username;
+  final String phoneNumber;
+  final String password;
+  final File? profileImage;
+
+  PrivacyPolicyPage({
+    required this.username,
+    required this.phoneNumber,
+    required this.password,
+    this.profileImage,
+  });
+
   @override
   State<PrivacyPolicyPage> createState() => _PrivacyPolicyPageState();
 }
 
 class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
+
   bool isChecked = false;
 
   @override
   Widget build(BuildContext context) {
+    print("Username is ${widget.username}, phone number is ${widget.phoneNumber}, password is ${widget.password}, profile image is ${widget.profileImage}");
     return Scaffold(
       backgroundColor: SECONDARY_COLOR,
       appBar: AppBar(
@@ -24,7 +40,8 @@ class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
         centerTitle: true,
         leading: GestureDetector(
           onTap: () {
-            Navigator.pop(context, DummyMessageVO(message: "Wow........", isMe: false));
+            Navigator.pop(
+                context, DummyMessageVO(message: "Wow........", isMe: false));
           },
           child: Icon(
             Icons.close,
@@ -106,13 +123,21 @@ class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
                     AuthButtonView(
                       label: "Continue",
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => EmailFormPage(),
-                          ),
-                        );
+                        if(isChecked) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EmailFormPage(
+                                username: widget.username,
+                                phoneNumber: widget.phoneNumber,
+                                password: widget.password,
+                                profileImage: widget.profileImage,
+                              ),
+                            ),
+                          );
+                        }
                       },
+                      isButtonEnable: isChecked,
                     ),
                   ],
                 ),

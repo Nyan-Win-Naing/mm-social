@@ -9,6 +9,8 @@ class AuthFormView extends StatelessWidget {
   bool isNumber;
   bool isPassword;
   final bool isEmail;
+  final Function(String) onChanged;
+
 
   AuthFormView({
     required this.label,
@@ -16,6 +18,7 @@ class AuthFormView extends StatelessWidget {
     this.isNumber = false,
     this.isPassword = false,
     this.isEmail = false,
+    required this.onChanged,
   });
 
   @override
@@ -27,6 +30,9 @@ class AuthFormView extends StatelessWidget {
           color: Color.fromRGBO(255, 255, 255, 0.7),
           fontSize: TEXT_REGULAR,
         ),
+        onChanged: (value) {
+          onChanged(value);
+        },
         keyboardType: isNumber ? TextInputType.phone : isEmail ? TextInputType.emailAddress : null,
         obscureText: isPassword,
         decoration: InputDecoration(

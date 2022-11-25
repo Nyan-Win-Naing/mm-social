@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mm_social/dummy/dummy_data.dart';
+import 'package:mm_social/pages/sign_up_page.dart';
 import 'package:mm_social/resources/colors.dart';
 import 'package:mm_social/resources/dimens.dart';
 import 'package:mm_social/viewitems/country_item_view.dart';
