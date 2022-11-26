@@ -17,4 +17,10 @@ abstract class SocialDataAgent {
   bool isLoggedIn();
   UserVO getLoggedInUser();
   Future logOut();
+  Future<UserVO> getUserById(String userId);
+
+  /// Friend Invitation
+  Future<void> addFriendToScannerContact(String scannerId, UserVO userVo);
+  Future<void> addScannerToFriendContact(String friendId, UserVO userVo);
+  Stream<List<UserVO>> getContacts();
 }

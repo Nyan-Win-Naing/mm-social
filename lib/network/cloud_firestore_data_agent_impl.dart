@@ -11,6 +11,7 @@ import 'package:mm_social/network/social_data_agent.dart';
 const feedCollection = "feed";
 const usersCollection = "users";
 const fileUploadRef = "uploads";
+const contactsCollection = "contacts";
 
 class CloudFirestoreDataAgentImpl extends SocialDataAgent {
   /// Firestore
@@ -115,5 +116,61 @@ class CloudFirestoreDataAgentImpl extends SocialDataAgent {
         .collection(usersCollection)
         .doc(newUser.id.toString())
         .set(newUser.toJson());
+  }
+
+  @override
+  Future<UserVO> getUserById(String userId) {
+    // return _firestore
+    //     .collection(usersCollection)
+    //     .doc(userId)
+    //     .get()
+    //     .asStream()
+    //     .where((documentSnapShot) => documentSnapShot.data() != null)
+    //     .map((documentSnapShot) => UserVO.fromJson(documentSnapShot.data()!));
+    return _firestore
+        .collection(usersCollection)
+        .doc(userId)
+        .get()
+        .then((documentSnapShot) {
+      if (documentSnapShot.data() != null) {
+        return UserVO.fromJson(documentSnapShot.data()!);
+      } else {
+        return UserVO();
+      }
+    });
+  }
+
+  @override
+  Future<void> addFriendToScannerContact(String scannerId, UserVO userVo) {
+    return _firestore
+        .collection(usersCollection)
+        .doc(scannerId)
+        .collection(contactsCollection)
+        .doc(userVo.id)
+        .set(userVo.toJson());
+  }
+
+  @override
+  Future<void> addScannerToFriendContact(String friendId, UserVO userVo) {
+    return _firestore
+        .collection(usersCollection)
+        .doc(friendId)
+        .collection(contactsCollection)
+        .doc(userVo.id)
+        .set(userVo.toJson());
+  }
+
+  @override
+  Stream<List<UserVO>> getContacts() {
+    return _firestore
+        .collection(usersCollection)
+        .doc(getLoggedInUser().id)
+        .collection(contactsCollection)
+        .snapshots()
+        .map((querySnapShot) {
+      return querySnapShot.docs.map<UserVO>((document) {
+        return UserVO.fromJson(document.data());
+      }).toList();
+    });
   }
 }

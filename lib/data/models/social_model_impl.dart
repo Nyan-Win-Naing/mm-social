@@ -1,7 +1,10 @@
 import 'dart:io';
 
+import 'package:mm_social/data/models/authentication_model.dart';
+import 'package:mm_social/data/models/authentication_model_impl.dart';
 import 'package:mm_social/data/models/social_model.dart';
 import 'package:mm_social/data/vos/feed_vo.dart';
+import 'package:mm_social/data/vos/user_vo.dart';
 import 'package:mm_social/network/cloud_firestore_data_agent_impl.dart';
 import 'package:mm_social/network/social_data_agent.dart';
 
@@ -16,6 +19,9 @@ class SocialModelImpl extends SocialModel {
 
   /// Data Agent
   SocialDataAgent mDataAgent = CloudFirestoreDataAgentImpl();
+
+  /// Models
+  AuthenticationModel _mAuthenticationModel = AuthenticationModelImpl();
 
   @override
   Future<void> addNewPost(
@@ -91,5 +97,25 @@ class SocialModelImpl extends SocialModel {
   @override
   Stream<List<FeedVO>> getFeeds() {
     return mDataAgent.getFeeds();
+  }
+
+  @override
+  Future<void> addFriendToScannerContact(String scannerId, String friendId) {
+    return _mAuthenticationModel.getUserById(friendId).then((friendUser) {
+      return mDataAgent.addFriendToScannerContact(scannerId, friendUser);
+    });
+    // return mDataAgent.addFriendToScannerContact(scannerId, friendUserVo);
+  }
+
+  @override
+  Future<void> addScannerToFriendContact(String friendId, String scannerId) {
+    return _mAuthenticationModel.getUserById(scannerId).then((scannerUser) {
+      return mDataAgent.addScannerToFriendContact(friendId, scannerUser);
+    });
+  }
+
+  @override
+  Stream<List<UserVO>> getContacts() {
+    return mDataAgent.getContacts();
   }
 }

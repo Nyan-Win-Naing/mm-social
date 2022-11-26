@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mm_social/blocs/profile_bloc.dart';
 import 'package:mm_social/data/vos/user_vo.dart';
 import 'package:mm_social/pages/get_started_page.dart';
+import 'package:mm_social/pages/invite_friend_page.dart';
 import 'package:mm_social/resources/colors.dart';
 import 'package:mm_social/resources/dimens.dart';
 import 'package:provider/provider.dart';
@@ -37,18 +38,31 @@ class ProfilePage extends StatelessWidget {
             ),
           ),
           actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: MARGIN_MEDIUM),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.qr_code_2,
+            Selector<ProfileBloc, UserVO?>(
+              selector: (context, bloc) => bloc.loggedInUser,
+              builder: (context, loggedInUser, child) => Padding(
+                padding: const EdgeInsets.only(right: MARGIN_MEDIUM),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => InviteFriendPage(qrCode: loggedInUser?.qrCode ?? ""),
+                      ),
+                    );
+                  },
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.qr_code_2,
+                      ),
+                      SizedBox(width: MARGIN_SMALL),
+                      Icon(
+                        Icons.arrow_forward_ios,
+                      ),
+                    ],
                   ),
-                  SizedBox(width: MARGIN_SMALL),
-                  Icon(
-                    Icons.arrow_forward_ios,
-                  ),
-                ],
+                ),
               ),
             ),
           ],
@@ -59,7 +73,9 @@ class ProfilePage extends StatelessWidget {
               children: [
                 Selector<ProfileBloc, UserVO?>(
                   selector: (context, bloc) => bloc.loggedInUser,
-                  builder: (context, loggedInUser, child) => ProfileImageSectionView(profileImage: loggedInUser?.profilePicture ?? ""),
+                  builder: (context, loggedInUser, child) =>
+                      ProfileImageSectionView(
+                          profileImage: loggedInUser?.profilePicture ?? ""),
                 ),
                 Padding(
                   padding:
@@ -201,9 +217,7 @@ class BioSectionView extends StatelessWidget {
 }
 
 class ProfileImageSectionView extends StatelessWidget {
-
   final String profileImage;
-
 
   ProfileImageSectionView({required this.profileImage});
 
@@ -240,7 +254,9 @@ class ProfileImageSectionView extends StatelessWidget {
                 ),
                 image: DecorationImage(
                     image: NetworkImage(
-                        (profileImage.isNotEmpty) ? profileImage : "https://brsc.sa.edu.au/wp-content/uploads/2018/09/placeholder-profile-sq.jpg",
+                      (profileImage.isNotEmpty)
+                          ? profileImage
+                          : "https://brsc.sa.edu.au/wp-content/uploads/2018/09/placeholder-profile-sq.jpg",
                     ),
                     fit: BoxFit.cover),
                 boxShadow: [

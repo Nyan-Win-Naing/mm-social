@@ -6,13 +6,25 @@ import 'package:mm_social/pages/profile_page.dart';
 import 'package:mm_social/resources/colors.dart';
 
 class BottomNavPage extends StatefulWidget {
+  final int navIndex;
+
+
+  BottomNavPage({this.navIndex = 0});
+
   @override
   State<BottomNavPage> createState() => _BottomNavPageState();
 }
 
 class _BottomNavPageState extends State<BottomNavPage> {
 
-  int _selectedIndex = 0;
+  late int _selectedIndex;
+
+
+  @override
+  void initState() {
+    _selectedIndex = widget.navIndex;
+    super.initState();
+  }
 
   List<Widget> _widgetOptions = [
     ChatPage(),

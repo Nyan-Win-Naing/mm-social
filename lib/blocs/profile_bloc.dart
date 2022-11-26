@@ -12,8 +12,12 @@ class ProfileBloc extends ChangeNotifier {
   final AuthenticationModel _mAuthenticationModel = AuthenticationModelImpl();
 
   ProfileBloc() {
-    loggedInUser = _mAuthenticationModel.getLoggedInUser();
-    notifyListeners();
+    UserVO userVo = _mAuthenticationModel.getLoggedInUser();
+    print("User ID ==========> ${userVo.id}");
+    _mAuthenticationModel.getUserById(userVo.id ?? "").then((userVo) {
+      loggedInUser = userVo;
+      notifyListeners();
+    });
   }
 
   Future onTapLogout() {

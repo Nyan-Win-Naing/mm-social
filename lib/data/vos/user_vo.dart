@@ -50,6 +50,6 @@ class UserVO {
 
   @override
   String toString() {
-    return 'UserVO{id: $id, userName: $userName, email: $email, profilePicture: $profilePicture}';
+    return 'UserVO{id: $id, userName: $userName, email: $email, password: $password, phoneNumber: $phoneNumber, profilePicture: $profilePicture, qrCode: $qrCode, fcmToken: $fcmToken}';
   }
 }

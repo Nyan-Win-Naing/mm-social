@@ -8,4 +8,5 @@ abstract class AuthenticationModel {
   bool isLoggedIn();
   UserVO getLoggedInUser();
   Future<void> logOut();
+  Future<UserVO> getUserById(String userId);
 }

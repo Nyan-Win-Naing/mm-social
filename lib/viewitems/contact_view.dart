@@ -1,21 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:mm_social/data/vos/user_vo.dart';
 import 'package:mm_social/pages/conversation_page.dart';
 import 'package:mm_social/resources/colors.dart';
 import 'package:mm_social/resources/dimens.dart';
 
-class ContactGroupedByAlphabetView extends StatelessWidget {
+class ContactGroupedByAlphabetView extends StatefulWidget {
+
+  final String alphabet;
+  final List<UserVO> contactList;
+
+
+  ContactGroupedByAlphabetView({required this.alphabet, required this.contactList});
+
+  @override
+  State<ContactGroupedByAlphabetView> createState() => _ContactGroupedByAlphabetViewState();
+}
+
+class _ContactGroupedByAlphabetViewState extends State<ContactGroupedByAlphabetView> {
+
+  List<UserVO> contactsByAlphabet = [];
+
+  @override
+  void initState() {
+    contactsByAlphabet = widget.contactList.where((userVo) => userVo.userName?[0].toUpperCase() == widget.alphabet).toList();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AlphabetView(),
+        AlphabetView(alphabet: widget.alphabet, total: contactsByAlphabet.length),
         ListView.separated(
           shrinkWrap: true,
           physics: NeverScrollableScrollPhysics(),
-          itemCount: 3,
+          itemCount: contactsByAlphabet.length,
           itemBuilder: (context, index) {
-            return ContactView();
+            return ContactView(user: contactsByAlphabet[index]);
           },
           separatorBuilder: (BuildContext context, int index) {
             return Divider(height: 0.8, color: DIVIDER_COLOR);
@@ -27,9 +49,12 @@ class ContactGroupedByAlphabetView extends StatelessWidget {
 }
 
 class AlphabetView extends StatelessWidget {
-  const AlphabetView({
-    Key? key,
-  }) : super(key: key);
+
+  final String alphabet;
+  final int total;
+
+
+  AlphabetView({required this.alphabet, required this.total});
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +66,7 @@ class AlphabetView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            "A",
+            alphabet,
             style: TextStyle(
               color: Colors.white,
               fontSize: TEXT_REGULAR_2X,
@@ -49,7 +74,7 @@ class AlphabetView extends StatelessWidget {
             ),
           ),
           Text(
-            "10 Friends",
+            "$total Friends",
             style: TextStyle(
               color: Colors.grey,
               fontSize: TEXT_REGULAR_2X,
@@ -62,6 +87,12 @@ class AlphabetView extends StatelessWidget {
 }
 
 class ContactView extends StatelessWidget {
+
+  final UserVO? user;
+
+
+  ContactView({required this.user});
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -81,7 +112,7 @@ class ContactView extends StatelessWidget {
             CircleAvatar(
               radius: 35,
               backgroundImage: NetworkImage(
-                "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8cGVyc29ufGVufDB8fDB8fA%3D%3D&w=1000&q=80",
+                (user?.profilePicture ?? "").isNotEmpty ? user?.profilePicture ?? "" : "https://schooloflanguages.sa.edu.au/wp-content/uploads/2017/11/placeholder-profile-sq.jpg",
               ),
             ),
             SizedBox(width: MARGIN_MEDIUM_2),
@@ -89,7 +120,7 @@ class ContactView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Cherry David",
+                  user?.userName ?? "",
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: TEXT_REGULAR_2X,
@@ -98,7 +129,7 @@ class ContactView extends StatelessWidget {
                 ),
                 SizedBox(height: MARGIN_MEDIUM),
                 Text(
-                  "097734959569",
+                  user?.phoneNumber ?? "",
                   style: TextStyle(
                     color: CONTACT_PHONE_NUMBER_COLOR,
                   ),

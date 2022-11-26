@@ -70,4 +70,9 @@ class AuthenticationModelImpl extends AuthenticationModel {
     );
     return Future.value(newUser);
   }
+
+  @override
+  Future<UserVO> getUserById(String userId) {
+    return mDataAgent.getUserById(userId);
+  }
 }
