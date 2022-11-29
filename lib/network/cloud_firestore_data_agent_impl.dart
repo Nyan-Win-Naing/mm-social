@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:mm_social/data/vos/feed_vo.dart';
+import 'package:mm_social/data/vos/message_vo.dart';
 import 'package:mm_social/data/vos/user_vo.dart';
 import 'package:mm_social/network/social_data_agent.dart';
 
@@ -172,5 +173,11 @@ class CloudFirestoreDataAgentImpl extends SocialDataAgent {
         return UserVO.fromJson(document.data());
       }).toList();
     });
+  }
+
+  @override
+  Future<void> sendMessage(MessageVO messageVO, int friendId) {
+    // TODO: implement sendMessage
+    throw UnimplementedError();
   }
 }

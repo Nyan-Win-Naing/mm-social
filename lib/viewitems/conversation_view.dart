@@ -1,22 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:mm_social/blocs/chat_bloc.dart';
+import 'package:mm_social/data/vos/conversation_vo.dart';
+import 'package:mm_social/data/vos/user_vo.dart';
 import 'package:mm_social/pages/conversation_page.dart';
 import 'package:mm_social/resources/dimens.dart';
+import 'package:provider/provider.dart';
 
 class ConversationView extends StatelessWidget {
+  final ConversationVO? conversationVo;
 
-  final String name;
-
-
-  ConversationView({required this.name});
+  ConversationView({required this.conversationVo});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
+        ChatBloc bloc = Provider.of<ChatBloc>(context, listen: false);
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ConversationPage(),
+            builder: (context) =>
+                ConversationPage(userVo: conversationVo?.userVo),
           ),
         );
       },
@@ -26,9 +30,10 @@ class ConversationView extends StatelessWidget {
         // color: Colors.blue,
         child: Row(
           children: [
-            ProfileImageView(),
+            ProfileImageView(
+                profile: conversationVo?.userVo?.profilePicture ?? ""),
             SizedBox(width: MARGIN_MEDIUM_2),
-            ConversationNameAndMessageView(name: name),
+            ConversationNameAndMessageView(conversationVO: conversationVo),
           ],
         ),
       ),
@@ -37,10 +42,9 @@ class ConversationView extends StatelessWidget {
 }
 
 class ConversationNameAndMessageView extends StatelessWidget {
-  final String name;
+  final ConversationVO? conversationVO;
 
-
-  ConversationNameAndMessageView({required this.name});
+  ConversationNameAndMessageView({required this.conversationVO});
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +57,7 @@ class ConversationNameAndMessageView extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                name,
+                conversationVO?.userVo?.userName ?? "",
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: TEXT_REGULAR_2X,
@@ -61,7 +65,7 @@ class ConversationNameAndMessageView extends StatelessWidget {
                 ),
               ),
               Text(
-                "Wed",
+                conversationVO?.getDateTime() ?? "",
                 style: TextStyle(
                   color: Color.fromRGBO(125, 138, 152, 1.0),
                 ),
@@ -70,7 +74,7 @@ class ConversationNameAndMessageView extends StatelessWidget {
           ),
           SizedBox(height: MARGIN_CARD_MEDIUM_2),
           Text(
-            "Tom and Jerry is an American animated media franchise and series of comedy short films created in 1940 by William Hanna and Joseph Barbera.",
+            conversationVO?.message ?? "",
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
@@ -86,16 +90,18 @@ class ConversationNameAndMessageView extends StatelessWidget {
 }
 
 class ProfileImageView extends StatelessWidget {
-  const ProfileImageView({
-    Key? key,
-  }) : super(key: key);
+  final String profile;
+
+  ProfileImageView({required this.profile});
 
   @override
   Widget build(BuildContext context) {
     return CircleAvatar(
       radius: 35,
       backgroundImage: NetworkImage(
-        "https://www.dmarge.com/wp-content/uploads/2021/01/dwayne-the-rock-.jpg",
+        (profile.isNotEmpty)
+            ? profile
+            : "https://schooloflanguages.sa.edu.au/wp-content/uploads/2017/11/placeholder-profile-sq.jpg",
       ),
     );
   }

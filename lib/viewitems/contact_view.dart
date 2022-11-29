@@ -100,7 +100,7 @@ class ContactView extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ConversationPage(),
+            builder: (context) => ConversationPage(userVo: user),
           ),
         );
       },

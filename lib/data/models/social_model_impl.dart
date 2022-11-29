@@ -3,9 +3,13 @@ import 'dart:io';
 import 'package:mm_social/data/models/authentication_model.dart';
 import 'package:mm_social/data/models/authentication_model_impl.dart';
 import 'package:mm_social/data/models/social_model.dart';
+import 'package:mm_social/data/vos/conversation_vo.dart';
 import 'package:mm_social/data/vos/feed_vo.dart';
+import 'package:mm_social/data/vos/message_vo.dart';
 import 'package:mm_social/data/vos/user_vo.dart';
 import 'package:mm_social/network/cloud_firestore_data_agent_impl.dart';
+import 'package:mm_social/network/message_data_agent.dart';
+import 'package:mm_social/network/real_time_database_data_agent_impl.dart';
 import 'package:mm_social/network/social_data_agent.dart';
 
 class SocialModelImpl extends SocialModel {
@@ -19,6 +23,7 @@ class SocialModelImpl extends SocialModel {
 
   /// Data Agent
   SocialDataAgent mDataAgent = CloudFirestoreDataAgentImpl();
+  MessageDataAgent mMessageDataAgent = RealtimeDatabaseDataAgentImpl();
 
   /// Models
   AuthenticationModel _mAuthenticationModel = AuthenticationModelImpl();
@@ -117,5 +122,60 @@ class SocialModelImpl extends SocialModel {
   @override
   Stream<List<UserVO>> getContacts() {
     return mDataAgent.getContacts();
+  }
+
+  @override
+  Future<void> sendMessage({
+    required String friendId,
+    required String message,
+    required File? imageFile,
+    required File? videoFile,
+  }) {
+    if (imageFile != null) {
+      return mMessageDataAgent
+          .uploadFileToFirebase(imageFile)
+          .then((downloadUrl) => craftMessageVO(message, downloadUrl, ""))
+          .then((newMessage) =>
+              mMessageDataAgent.sendMessage(newMessage, friendId));
+    } else if (videoFile != null) {
+      return mMessageDataAgent
+          .uploadFileToFirebase(videoFile)
+          .then((downloadUrl) => craftMessageVO(message, "", downloadUrl))
+          .then((newMessage) =>
+              mMessageDataAgent.sendMessage(newMessage, friendId));
+    } else {
+      return craftMessageVO(message, "", "").then(
+          (newMessage) => mMessageDataAgent.sendMessage(newMessage, friendId));
+    }
+  }
+
+  Future<MessageVO> craftMessageVO(
+      String message, String imageUrl, String videoUrl) {
+    var currentMilliseconds = DateTime.now().millisecondsSinceEpoch;
+    var newMessage = MessageVO(
+      image: imageUrl,
+      video: videoUrl,
+      message: message,
+      name: _mAuthenticationModel.getLoggedInUser().userName,
+      profilePic: _mAuthenticationModel.getLoggedInUser().profilePicture,
+      timeStamp: currentMilliseconds,
+      userId: _mAuthenticationModel.getLoggedInUser().id,
+    );
+    return Future.value(newMessage);
+  }
+
+  @override
+  Stream<List<MessageVO>> getMessages(String friendId) {
+    return mMessageDataAgent.getMessages(friendId);
+  }
+
+  @override
+  Stream<List<Future<ConversationVO>>> getConversations() {
+    return mMessageDataAgent.getConversations();
+  }
+
+  @override
+  Future<void> deleteConversation(String friendId) {
+    return mMessageDataAgent.deleteConversation(friendId);
   }
 }

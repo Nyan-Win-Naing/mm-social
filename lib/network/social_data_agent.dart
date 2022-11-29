@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:mm_social/data/vos/feed_vo.dart';
+import 'package:mm_social/data/vos/message_vo.dart';
 import 'package:mm_social/data/vos/user_vo.dart';
 
 abstract class SocialDataAgent {
